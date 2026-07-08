@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recharge - Connect</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+
+    <!-- Load GSAP and ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            /* Sleek Tech Font Default */
+            font-family: 'Inter', sans-serif;
+            
+            /* Starting color: Deep Dark Blue */
+            background-color: #020817; 
+            color: #ffffff;
+            transition: color 0.5s ease;
+            overflow-x: hidden;
+        }
+
+        /* Typography Classes */
+        .tech-heading { font-weight: 900; letter-spacing: -1px; }
+        .editorial-heading { font-family: 'Playfair Display', serif; font-style: italic; }
+
+        /* Scroll Sections (Main Match View) */
+        #match-view {
+            display: block; /* Default view */
+            padding-bottom: 100px; /* Space for the dock */
+        }
+        
+        /* Hidden SPA Sections */
+        .spa-view {
+            display: none;
+            min-height: 100vh;
+            padding: 60px 40px 120px 40px; /* Space for dock */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .scroll-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .reveal-text {
+            font-size: 4rem;
+            opacity: 0;
+            transform: translateY(50px);
+            z-index: 2;
+        }
+
+        .sub-text {
+            font-size: 1.5rem;
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            max-width: 600px;
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.7); 
+        }
+
+        /* Section 2: Apple-Style Split Layout */
+        .split-layout {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            width: 100%;
+            gap: 50px;
+        }
+
+        .split-text { flex: 1; text-align: left; }
+        .split-text h1 { font-size: 4.5rem; line-height: 1.1; margin-bottom: 20px; }
+        
+        .split-image {
+            flex: 1; border-radius: 24px; overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); opacity: 0; transform: scale(0.9);
+        }
+        .split-image img { width: 100%; height: auto; display: block; }
+
+        /* Recharge Energy Animations */
+        .floating-energy {
+            position: absolute; width: 100%; height: 100%;
+            pointer-events: none; overflow: hidden; z-index: 1; opacity: 0;
+        }
+
+        .energy-icon {
+            position: absolute; font-size: 2rem;
+            animation: floatUp 6s infinite ease-in-out, pound 1s infinite alternate;
+            opacity: 0.8;
+        }
+
+        .energy-icon:nth-child(1) { left: 15%; animation-delay: 0s; font-size: 2.5rem; }
+        .energy-icon:nth-child(2) { left: 75%; animation-delay: 2s; font-size: 3.5rem; }
+        .energy-icon:nth-child(3) { left: 45%; animation-delay: 4s; font-size: 2rem; }
+        .energy-icon:nth-child(4) { left: 85%; animation-delay: 1.5s; font-size: 2rem; }
+        .energy-icon:nth-child(5) { left: 25%; animation-delay: 3s; font-size: 3rem; }
+
+        @keyframes floatUp {
+            0% { bottom: -10%; transform: translateX(0); }
+            50% { transform: translateX(30px); }
+            100% { bottom: 110%; transform: translateX(-30px); }
+        }
+        @keyframes pound { 0% { transform: scale(1); } 100% { transform: scale(1.2); } }
+
+        /* Tinder-Style Prototype Container */
+        #prototype-container {
+            width: 380px; height: 750px; background: #111;
+            border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            border: 8px solid #f5f5f7; margin-bottom: 20px;
+        }
+
+        .profile-img-wrapper { width: 100%; height: 85%; position: relative; }
+        .profile-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .img-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0) 100%);
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 20px; text-align: left;
+        }
+
+        .user-name { font-size: 2.2rem; font-weight: 900; color: #fff; }
+        .user-dept { font-size: 1rem; color: #bbb; margin-bottom: 12px; }
+        
+        .tag-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;}
+        .tag { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;}
+        .tag.strong { background: rgba(78, 205, 196, 0.2); color: #4ecdc4; border: 1px solid #4ecdc4; }
+        .tag.weak { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; border: 1px solid #ff6b6b; }
+        
+        .user-bio { font-size: 0.95rem; color: #ddd; font-style: italic; margin-top: 12px; line-height: 1.4; }
+
+        .action-bar {
+            height: 15%; background: #000;
+            display: flex; justify-content: space-evenly; align-items: center;
+        }
+
+        .action-btn {
+            width: 65px; height: 65px; border-radius: 50%; border: none; cursor: pointer;
+            font-size: 2rem; display: flex; justify-content: center; align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-pass { background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; }
+        .btn-pass:hover { background: rgba(255, 107, 107, 0.1); transform: scale(1.1); box-shadow: 0 0 20px rgba(255,107,107,0.4); }
+        .btn-connect { background: transparent; color: #4ecdc4; border: 2px solid #4ecdc4; }
+        .btn-connect:hover { background: rgba(78, 205, 196, 0.1); transform: scale(1.1); box-shadow: 0 0 20px rgba(78,205,196,0.4); }
+
+        /* Glassmorphism Navigation Dock */
+        #bottom-nav {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 40px;
+            display: flex; gap: 20px; padding: 10px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            background: none; border: none; color: white; cursor: pointer;
+            transition: transform 0.2s; min-width: 60px;
+        }
+
+        .nav-item:hover { transform: scale(1.1); color: #4ecdc4; }
+        .nav-item.active { color: #4ecdc4; font-weight: bold; }
+        .nav-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .nav-label { font-size: 0.75rem; font-family: 'Inter', sans-serif; }
+
+        /* --- SPA Section Styles --- */
+        .section-header { font-size: 3rem; margin-bottom: 40px; text-align: left; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
+        
+        /* Group Study Hub Grid */
+        .study-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .study-card {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 25px; backdrop-filter: blur(10px);
+        }
+        .study-card h3 { font-size: 1.5rem; margin-bottom: 10px; color: #4ecdc4; }
+        .seat-indicator { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
+        .join-btn {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: #4ecdc4; color: #000; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .join-btn:hover { background: #3ab5ac; }
+
+        /* Project Guides List */
+        .guides-list { display: flex; flex-direction: column; gap: 20px; }
+        .guide-card {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 30px; backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .guide-info h3 { font-size: 1.6rem; margin-bottom: 8px; }
+        .guide-info p { color: #bbb; }
+        .read-btn {
+            padding: 10px 20px; border-radius: 20px; border: 1px solid #fff;
+            background: transparent; color: #fff; cursor: pointer; transition: 0.2s;
+        }
+        .read-btn:hover { background: #fff; color: #000; }
+
+        /* Merch Store Grid */
+        .merch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; }
+        .merch-card {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; overflow: hidden; backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .merch-img-placeholder {
+            width: 100%; height: 250px; background: #222; 
+            display: flex; align-items: center; justify-content: center; font-size: 4rem;
+        }
+        .merch-details { padding: 20px; }
+        .merch-details h3 { font-size: 1.2rem; margin-bottom: 10px; }
+        .merch-price { color: #4ecdc4; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; }
+        
+        /* Liquid Fill Hover Animation for Cart */
+        .cart-btn {
+            position: relative; overflow: hidden; width: 100%; padding: 12px;
+            border-radius: 10px; border: 1px solid #4ecdc4; background: transparent; color: #4ecdc4;
+            font-weight: bold; cursor: pointer; z-index: 1; transition: color 0.4s;
+        }
+        .cart-btn::before {
+            content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 100%;
+            background: #4ecdc4; z-index: -1; transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cart-btn:hover { color: #000; }
+        .cart-btn:hover::before { top: 0; }
+
+        /* Inverse body colors for SPA when not in scroll view */
+        body.spa-active {
+            background-color: #020817; color: #fff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- IOS GLASSMORPHISM DOCK -->
+    <div id="bottom-nav">
+        <button class="nav-item active" onclick="switchView('match')">
+            <span class="nav-icon">⚡</span>
+            <span class="nav-label">Match</span>
+        </button>
+        <button class="nav-item" onclick="switchView('study')">
+            <span class="nav-icon">📚</span>
+            <span class="nav-label">Study Hub</span>
+        </button>
+        <button class="nav-item" onclick="switchView('guides')">
+            <span class="nav-icon">🧭</span>
+            <span class="nav-label">Guides</span>
+        </button>
+        <button class="nav-item" onclick="switchView('merch')">
+            <span class="nav-icon">🛍️</span>
+            <span class="nav-label">Merch</span>
+        </button>
+    </div>
+
+    <!-- MAIN VIEW 1: THE MATCH SCROLL (Original Presentation) -->
+    <div id="match-view">
+        <div class="scroll-section" id="sec-1">
+            <h1 class="reveal-text tech-heading">Recharge your<br>academic life.</h1>
+        </div>
+
+        <div class="scroll-section" id="sec-2">
+            <div class="split-layout">
+                <div class="split-text">
+                    <h1 class="reveal-text tech-heading" style="font-size: 3.5rem;">Makes a strong<br>case for itself.</h1>
+                    <p class="sub-text reveal-text">Stop struggling alone in the library. Our algorithm pairs your academic weaknesses with someone else's strengths, creating the ultimate hackathon teams and study sessions.</p>
+                </div>
+                <div class="split-image" id="apple-image">
+                    <img src="image_e0b3fd.png.png" alt="Students collaborating">
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-section" id="sec-3">
+            <h1 class="reveal-text tech-heading" style="font-size: 5rem; line-height: 1;">Match by Tech Stack.<br><span style="color: #4ecdc4;">Connect by Vibe.</span></h1>
+        </div>
+
+        <div class="scroll-section" id="sec-4">
+            <div class="floating-energy" id="energy-container">
+                <div class="energy-icon">❤️</div>
+                <div class="energy-icon">⚡</div>
+                <div class="energy-icon">🔋</div>
+                <div class="energy-icon">🤝</div>
+                <div class="energy-icon">✨</div>
+            </div>
+            <h1 class="reveal-text editorial-heading">Study Together.<br>Grow Together.</h1>
+            <p class="sub-text reveal-text" style="color: rgba(255, 255, 255, 0.85); font-family: 'Inter', sans-serif;">Because sometimes, finding the perfect partner for your project is just the beginning of the story.</p>
+        </div>
+
+        <div class="scroll-section" id="sec-5">
+            <h2 class="tech-heading reveal-text-final" style="color: inherit; margin-bottom: 30px; font-size: 2rem;">Live Prototype</h2>
+            <div id="prototype-container">
+                <div class="profile-img-wrapper">
+                    <img id="ui-img" src="image_e0b039.jpg.png" alt="Profile">
+                    <div class="img-overlay">
+                        <div class="user-name" id="ui-name">K. Visagan</div>
+                        <div class="user-dept" id="ui-dept">AIML, Section D</div>
+                        <div class="tag-row"><span class="tag strong" id="ui-strong">↑ Python • Machine Learning</span></div>
+                        <div class="tag-row"><span class="tag weak" id="ui-weak">↓ Advanced UI/UX</span></div>
+                        <div class="user-bio" id="ui-bio">"Working on a quant project. Need someone who can help build a clean web interface for it."</div>
+                    </div>
+                </div>
+                <div class="action-bar">
+                    <button class="action-btn btn-pass" onclick="nextProfile()">✕</button>
+                    <button class="action-btn btn-connect" onclick="nextProfile()">♥</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN VIEW 2: STUDY HUB -->
+    <div id="study-view" class="spa-view">
+        <h1 class="tech-heading section-header">Group Study Hub</h1>
+        <div class="study-grid">
+            <div class="study-card">
+                <h3>Late Night LeetCode</h3>
+                <p class="seat-indicator">👥 2 / 4 Seats Filled</p>
+                <button class="join-btn">Join Table</button>
+            </div>
+            <div class="study-card">
+                <h3>C Programming Pointers</h3>
+                <p class="seat-indicator">👥 1 / 4 Seats Filled</p>
+                <button class="join-btn">Join Table</button>
+            </div>
+            <div class="study-card">
+                <h3>Model UN Prep</h3>
+                <p class="seat-indicator">👥 3 / 4 Seats Filled</p>
+                <button class="join-btn">Join Table</button>
+            </div>
+            <div class="study-card">
+                <h3>Calculus III Midterm</h3>
+                <p class="seat-indicator">👥 4 / 4 Seats Filled (Full)</p>
+                <button class="join-btn" disabled style="background:#555; color:#888; cursor:not-allowed;">Table Full</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN VIEW 3: PROJECT GUIDES -->
+    <div id="guides-view" class="spa-view">
+        <h1 class="tech-heading section-header">Premium Project Blueprints</h1>
+        <div class="guides-list">
+            <div class="guide-card">
+                <div class="guide-info">
+                    <h3>Building a Quad-Rotor Tail-Sitter UAV</h3>
+                    <p>A complete hardware and software guide for aerospace enthusiasts.</p>
+                </div>
+                <button class="read-btn">Read Blueprint</button>
+            </div>
+            <div class="guide-card">
+                <div class="guide-info">
+                    <h3>Energy-Aware Algorithmic Trading Models</h3>
+                    <p>Combine ML predictions with efficient execution for quant trading.</p>
+                </div>
+                <button class="read-btn">Read Blueprint</button>
+            </div>
+            <div class="guide-card">
+                <div class="guide-info">
+                    <h3>PostgreSQL Database Integration</h3>
+                    <p>The backend essential: setting up scalable relational databases.</p>
+                </div>
+                <button class="read-btn">Read Blueprint</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN VIEW 4: MERCH STORE -->
+    <div id="merch-view" class="spa-view">
+        <h1 class="tech-heading section-header">Recharge Merch Store</h1>
+        <div class="merch-grid">
+            <div class="merch-card">
+                <div class="merch-img-placeholder">👕</div>
+                <div class="merch-details">
+                    <h3>Oversized Graphic Tee</h3>
+                    <p class="merch-price">$24.99</p>
+                    <button class="cart-btn">Add to Cart</button>
+                </div>
+            </div>
+            <div class="merch-card">
+                <div class="merch-img-placeholder">👖</div>
+                <div class="merch-details">
+                    <h3>Flat-Front Cargo Pants</h3>
+                    <p class="merch-price">$45.00</p>
+                    <button class="cart-btn">Add to Cart</button>
+                </div>
+            </div>
+            <div class="merch-card">
+                <div class="merch-img-placeholder">📿</div>
+                <div class="merch-details">
+                    <h3>Norse-Inspired Rune Accessories</h3>
+                    <p class="merch-price">$18.50</p>
+                    <button class="cart-btn">Add to Cart</button>
+                </div>
+            </div>
+            <div class="merch-card">
+                <div class="merch-img-placeholder">☕</div>
+                <div class="merch-details">
+                    <h3>Recharge Coffee Mug</h3>
+                    <p class="merch-price">$12.00</p>
+                    <button class="cart-btn">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 0. SPA ROUTING LOGIC
+        function switchView(viewId) {
+            // Update Navigation state
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Hide all views
+            document.getElementById('match-view').style.display = 'none';
+            document.getElementById('study-view').style.display = 'none';
+            document.getElementById('guides-view').style.display = 'none';
+            document.getElementById('merch-view').style.display = 'none';
+
+            // Show selected view
+            if (viewId === 'match') {
+                document.getElementById('match-view').style.display = 'block';
+                document.body.classList.remove('spa-active');
+                
+                // GSAP ScrollTriggers need a refresh after display:none is removed
+                ScrollTrigger.refresh();
+            } else {
+                document.getElementById(viewId + '-view').style.display = 'block';
+                document.body.classList.add('spa-active');
+                // Scroll to top when switching to a new SPA tab
+                window.scrollTo(0,0);
+            }
+        }
+
+
+        // 1. GSAP SCROLL ANIMATIONS (Only apply to Match View)
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Transition 1: Deep Dark Blue to Midnight Blue
+        gsap.to("body", {
+            backgroundColor: "#0d2657", 
+            scrollTrigger: { trigger: "#sec-2", start: "top center", end: "bottom center", scrub: true }
+        });
+
+        // Transition 2: Midnight Blue to Vibrant K-Drama Blue
+        gsap.to("body", {
+            backgroundColor: "#1e4a9e",
+            scrollTrigger: { trigger: "#sec-4", start: "top center", end: "bottom center", scrub: true }
+        });
+
+        // Transition 3: Vibrant Blue to Soft Light Blue for Prototype
+        gsap.to("body", {
+            backgroundColor: "#e0f2fe", color: "#0f172a",
+            scrollTrigger: { trigger: "#sec-5", start: "top center", end: "bottom center", scrub: true }
+        });
+
+        // Standard Fade in text elements
+        gsap.utils.toArray('.reveal-text').forEach(text => {
+            gsap.to(text, {
+                scrollTrigger: {
+                    trigger: text, start: "top 85%", toggleActions: "play none none reverse"
+                },
+                opacity: 1, y: 0, duration: 1, ease: "power3.out"
+            });
+        });
+
+        // Special Apple Image Reveal
+        gsap.to("#apple-image", {
+            scrollTrigger: { trigger: "#sec-2", start: "top 70%", toggleActions: "play none none reverse" },
+            opacity: 1, scale: 1, duration: 1.2, ease: "expo.out"
+        });
+
+        // Fade in floating energy on Section 4
+        gsap.to("#energy-container", {
+            scrollTrigger: { trigger: "#sec-4", start: "top 70%", toggleActions: "play none none reverse" },
+            opacity: 1, duration: 1
+        });
+
+
+        // 2. API INTEGRATION / PROTOTYPE LOGIC
+        let profiles = [];
+        let currentIndex = 0;
+
+        async function fetchProfiles() {
+            try {
+                const response = await fetch("http://localhost:8000/api/profiles");
+                if (!response.ok) throw new Error("Network response was not ok");
+                profiles = await response.json();
+                
+                if (profiles.length > 0) {
+                    updateUI(0);
+                }
+            } catch (error) {
+                console.error("Error fetching profiles:", error);
+                document.getElementById('ui-bio').innerText = "Error: Could not connect to the backend.";
+            }
+        }
+
+        function updateUI(index) {
+            const p = profiles[index];
+            document.getElementById('ui-img').src = p.img;
+            document.getElementById('ui-name').innerText = p.name;
+            document.getElementById('ui-dept').innerText = p.dept;
+            document.getElementById('ui-strong').innerText = "↑ " + p.strong;
+            document.getElementById('ui-weak').innerText = "↓ " + p.weak;
+            document.getElementById('ui-bio').innerText = '"' + p.bio + '"';
+        }
+
+        function nextProfile() {
+            if (profiles.length === 0) return;
+
+            const container = document.getElementById('prototype-container');
+            container.style.transform = "scale(0.95)";
+            setTimeout(() => { container.style.transform = "scale(1)"; }, 150);
+
+            currentIndex++;
+            if (currentIndex >= profiles.length) { currentIndex = 0; }
+            updateUI(currentIndex);
+        }
+
+        fetchProfiles();
+    </script>
+</body>
+</html>
